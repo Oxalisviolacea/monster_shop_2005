@@ -2,28 +2,39 @@ Rails.application.routes.draw do
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
   root 'welcome#index'
 
-  get '/merchants', to: 'merchants#index'
-  get '/merchants/new', to: 'merchants#new'
-  get '/merchants/:id', to: 'merchants#show'
-  post '/merchants', to: 'merchants#create'
-  get '/merchants/:id/edit', to: 'merchants#edit'
-  patch '/merchants/:id', to: 'merchants#update'
-  delete '/merchants/:id', to: 'merchants#destroy'
+  resources :merchants
+  # get '/merchants', to: 'merchants#index'
+  # get '/merchants/new', to: 'merchants#new'
+  # get '/merchants/:id', to: 'merchants#show'
+  # post '/merchants', to: 'merchants#create'
+  # get '/merchants/:id/edit', to: 'merchants#edit'
+  # patch '/merchants/:id', to: 'merchants#update'
+  # delete '/merchants/:id', to: 'merchants#destroy'
 
-  get '/items', to: 'items#index'
-  get '/items/:id', to: 'items#show'
-  get '/items/:id/edit', to: 'items#edit'
-  patch '/items/:id', to: 'items#update'
-  get '/merchants/:merchant_id/items', to: 'items#index'
-  get '/merchants/:merchant_id/items/new', to: 'items#new'
-  post '/merchants/:merchant_id/items', to: 'items#create'
-  delete '/items/:id', to: 'items#destroy'
+  resources :items, except: [:new, :create]
+  # get '/items', to: 'items#index'
+  # get '/items/:id', to: 'items#show'
+  # get '/items/:id/edit', to: 'items#edit'
+  # patch '/items/:id', to: 'items#update'
+  # delete '/items/:id', to: 'items#destroy'
 
-  get '/items/:item_id/reviews/new', to: 'reviews#new'
-  post '/items/:item_id/reviews', to: 'reviews#create'
-  get '/reviews/:id/edit', to: 'reviews#edit'
-  patch '/reviews/:id', to: 'reviews#update'
-  delete '/reviews/:id', to: 'reviews#destroy'
+  resources :merchants, only: [:show] do
+    resources :items, only: [:index, :new, :create]
+  end
+  # get '/merchants/:merchant_id/items', to: 'items#index'
+  # get '/merchants/:merchant_id/items/new', to: 'items#new'
+  # post '/merchants/:merchant_id/items', to: 'items#create'
+
+  resources :items, only: [:show] do
+    resources :reviews, only: [:new, :create]
+  end
+  # get '/items/:item_id/reviews/new', to: 'reviews#new'
+  # post '/items/:item_id/reviews', to: 'reviews#create'
+
+  resources :reviews, only: [:edit, :update, :destroy]
+  # get '/reviews/:id/edit', to: 'reviews#edit'
+  # patch '/reviews/:id', to: 'reviews#update'
+  # delete '/reviews/:id', to: 'reviews#destroy'
 
   post '/cart/:item_id', to: 'cart#add_item'
   get '/cart', to: 'cart#show'
@@ -31,13 +42,13 @@ Rails.application.routes.draw do
   delete '/cart', to: 'cart#empty'
   delete '/cart/:item_id', to: 'cart#remove_item'
 
-  get '/orders/new', to: 'orders#new'
-  post '/orders', to: 'orders#create'
-  get '/orders/:id', to: 'orders#show'
+  resources :orders, only: [:new, :create, :show]
+  # get '/orders/new', to: 'orders#new'
+  # post '/orders', to: 'orders#create'
+  # get '/orders/:id', to: 'orders#show'
 
   get '/register/new', to: 'users#new'
   post '/users', to: 'users#create'
-
   get '/profile', to: 'users#show'
 
   # sessions
@@ -47,15 +58,17 @@ Rails.application.routes.draw do
 
   namespace :merchant do
     get '/', to: 'dashboard#index'
-    get '/items', to: 'items#index'
-    get '/items/new', to: 'items#new'
-    post '/items', to: 'items#create'
+    resources :items, only: [:index, :new, :create]
+    # get '/items', to: 'items#index'
+    # get '/items/new', to: 'items#new'
+    # post '/items', to: 'items#create'
     patch '/items/:item_id', to: 'items#change_status'
     get '/items/:item_id/edit', to: 'items#edit'
     patch '/items/:item_id/edit', to: 'items#update'
     delete '/items/:item_id', to: 'items#destroy'
-    get '/orders/:id', to: 'orders#show'
-    patch "/orders/:id", to: 'orders#update'
+    resources :orders, only: [:show, :update]
+    # get '/orders/:id', to: 'orders#show'
+    # patch "/orders/:id", to: 'orders#update'
     get "/discounts", to: 'discounts#index', as: :discount
     post '/discounts', to: 'discounts#create'
     get "/discounts/new", to: 'discounts#new', as: :new_discount
@@ -67,9 +80,7 @@ Rails.application.routes.draw do
 
   namespace :admin do
     get '/', to: 'dashboard#index'
-
     patch '/orders/:order_id', to: 'orders#update'
-
     get '/merchants', to: 'merchants#index'
     get '/merchants/:id', to: 'merchants#show'
     patch '/merchants/:id', to: 'merchants#update'
